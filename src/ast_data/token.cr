@@ -1,10 +1,6 @@
 module DoisC
   module ASTData
 
-    # ##############################################################################################
-    #                                  Tokens Output by the Lexer                                   
-    # ##############################################################################################
-
     # A single lexed token for the AST
     struct Token
       property type : TokenType
@@ -81,7 +77,7 @@ module DoisC
       TokenType::AND_ASSIGN,
       TokenType::BITWISE_OR_ASSIGN,
       TokenType::BITWISE_AND_ASSIGN,
-      TokenType::BITWISE_XOR_ASSIGN 
+      TokenType::BITWISE_XOR_ASSIGN
     }
 
     # Mapping of assignment operators to their respective binary operators
@@ -127,7 +123,7 @@ module DoisC
         TokenType::BITWISE_AND_ASSIGN => 2,
         TokenType::AND_ASSIGN         => 1,
         TokenType::OR_ASSIGN          => 0,
-        
+
       }
 
     # Collection of all binary operators
@@ -137,7 +133,7 @@ module DoisC
       TokenType::COMP_LT, TokenType::COMP_GT,
       TokenType::COMP_GTEQ, TokenType::COMP_LTEQ,
       TokenType::COMP_EQ,
-      TokenType::AND, TokenType::OR, 
+      TokenType::AND, TokenType::OR,
       TokenType::EQ
     }
 

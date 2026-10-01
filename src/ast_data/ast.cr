@@ -4,12 +4,8 @@ require "./symbol_ref"
 require "../types/type"
 
 module DoisC
-  # Data Representations of Abstract Syntax Tree Components                
+  # Data Representations of Abstract Syntax Tree Components
   module ASTData
-
-    # ##############################################################################################
-    #                                              AST                                              
-    # ##############################################################################################
 
     # Container for abstract syntax tree (AST) nodes,
     # comprised of a single `Procedure`
@@ -25,11 +21,7 @@ module DoisC
       def initialize(@source_location : SourceLocation)
       end
     end
-    
 
-    # ##############################################################################################
-    #                                         Expresssion                                         
-    # ##############################################################################################
 
     # Base expression class, resolves to a type
     class Expression < Node
@@ -111,10 +103,6 @@ module DoisC
       end
     end
 
-    # ##############################################################################################
-    #                                             Call                                          
-    # ##############################################################################################
-
     # Base class for procedure and function calls to inherit from
     # Arguments may be positional (Expression) or named (NamedArgument)
     # Callee can be any Expression (not just Identifier), enabling chaining like a.b().c()
@@ -136,10 +124,6 @@ module DoisC
     # Arguments may be Expressions or NamedArgument for named args
     class FunctionCall < Call
     end
-
-    # ##############################################################################################
-    #                                     Procedure / Statement                                     
-    # ##############################################################################################
 
     # Container for a list of statements
     class Procedure < Node
@@ -190,10 +174,6 @@ module DoisC
       end
     end
 
-    # ##############################################################################################
-    #                                         Declaration                                         
-    # ##############################################################################################
-
     # Base class for declaration of a module, identifier, function, etc.
     abstract class Declaration < Statement
       abstract def name : String
@@ -232,7 +212,7 @@ module DoisC
     class VarDeclaration < Declaration
       getter name : String
       getter value : Expression?
-      getter type_id : TypeID? 
+      getter type_id : TypeID?
 
       property resolved_type : Types::Type?
 
@@ -315,13 +295,6 @@ module DoisC
       end
     end
 
-    
-
-    # ##############################################################################################
-    #                                          Identifier                                           
-    # ##############################################################################################
-
-    
     # An identifier representing a binding, variable, or function call
     class Identifier < Node
       getter name : String
@@ -338,10 +311,6 @@ module DoisC
       end
     end
 
-    # ##############################################################################################
-    #                            If-Branch  (used in statements and expressions)                                      
-    # ##############################################################################################
-
     # Single branch of if expression or statement
     class IfBranch(BodyType) < Node
       getter condition : Expression
@@ -351,11 +320,6 @@ module DoisC
         super(source_location)
       end
     end
-
-    # ##############################################################################################
-    #                                            Literal                                            
-    # ##############################################################################################
-
 
     # Base language literals like characters, nil, integers, etc.
     enum LiteralType
@@ -375,7 +339,7 @@ module DoisC
       abstract def literal_type : LiteralType
     end
 
-    # 
+    #
     abstract class LiteralValue < Literal
     end
 
@@ -394,12 +358,12 @@ module DoisC
 
     # Container for Char literal, i.e. 'c'
     class CharLiteral < LiteralValue
-      getter value : Char 
+      getter value : Char
 
       def initialize(@value : Char, source_location : SourceLocation)
         super(source_location)
       end
-      
+
       def literal_type : LiteralType
         LiteralType::Char
       end
@@ -422,7 +386,7 @@ module DoisC
     class BoolLiteral < LiteralValue
       getter value : Bool
 
-      def initialize(@value : Bool, source_location : SourceLocation) 
+      def initialize(@value : Bool, source_location : SourceLocation)
         super(source_location)
       end
 
@@ -435,7 +399,7 @@ module DoisC
     class IntLiteral < LiteralValue
       getter value : Int128
 
-      def initialize(@value : Int128, source_location : SourceLocation) 
+      def initialize(@value : Int128, source_location : SourceLocation)
         super(source_location)
       end
 
@@ -448,15 +412,14 @@ module DoisC
     class FloatLiteral < LiteralValue
       getter value : Float64
 
-      def initialize(@value : Float64, source_location : SourceLocation) 
+      def initialize(@value : Float64, source_location : SourceLocation)
         super(source_location)
       end
-      
+
       def literal_type : LiteralType
         LiteralType::Float
       end
     end
-    
 
     # Base class for array, tuple, and map literals
     abstract class LiteralCollection < Literal
@@ -496,13 +459,11 @@ module DoisC
       def initialize(@mappings : Hash(Expression, Expression), source_location : SourceLocation)
         super(source_location)
       end
-      
+
       def literal_type : LiteralType
         LiteralType::Map
       end
     end
-
-    # ##############################################################################################
 
     enum OperatorType
       ADD; SUB; MULT; DIV; EQ
@@ -532,10 +493,6 @@ module DoisC
       end
     end
 
-    # ##############################################################################################
-    #                                            Pattern                                            
-    # ##############################################################################################
-
     # A match expression, i.e. `match x then...`
     class MatchExpression < Expression
       getter scrutinee : Expression # can match to any expression ...
@@ -548,7 +505,7 @@ module DoisC
 
     # An if-let statement, i.e. `if let y = Some(x)...`
     class IfLetStatement < Statement
-      getter pattern : Pattern 
+      getter pattern : Pattern
       getter scrutinee : Expression
       getter body : Procedure
       getter else_body : Procedure?
@@ -635,19 +592,15 @@ module DoisC
       end
     end
 
-    # ##############################################################################################
-    #                                  Type Annotation Identifier                                   
-    # ##############################################################################################
-    
     # Type annotation identifier
     class TypeID < Node
-      getter name : String 
-      getter inner_type_ids : Array(TypeID) 
+      getter name : String
+      getter inner_type_ids : Array(TypeID)
 
       def initialize(@name : String, @inner_type_ids : Array(TypeID), source_location : SourceLocation)
         super(source_location)
       end
     end
-    
+
   end
 end

@@ -8,26 +8,20 @@ module DoisC
     # Holds context as verifier traverses AST's concrete types
     class VerificationContext
 
-      # ===== Global =====
       record LocalBinding,
         type : Types::Type,
         symbol_ref : ASTData::SymbolRef?
 
       getter globals : Global
 
-      # ===== Variable Scopes =====
       @scopes : Array(Hash(String, LocalBinding))
 
-      # ===== Generic Scopes =====
       @generic_scopes : Array(Hash(String, Types::GenericTypeParameter))
 
-      # ===== Function Context =====
       @current_return_type : Types::Type?
 
-      # ===== Module Scope =====
       @module_scope : Array(String)
 
-      # ===== Loop Depth (for break checking) =====
       @loop_depth : Int32
 
       def initialize(@globals : Global)
@@ -37,10 +31,6 @@ module DoisC
         @module_scope = [] of String
         @loop_depth = 0
       end
-
-      # ============================
-      # Variable Scope
-      # ============================
 
       def enter_scope
         @scopes.push({} of String => LocalBinding)
@@ -66,10 +56,6 @@ module DoisC
         binding ? binding.type : nil
       end
 
-      # ============================
-      # Generic Scope
-      # ============================
-
       def enter_generic_scope
         @generic_scopes.push({} of String => Types::GenericTypeParameter)
       end
@@ -93,10 +79,6 @@ module DoisC
         @generic_scopes.last || {} of String => Types::GenericTypeParameter
       end
 
-      # ============================
-      # Module Scope
-      # ============================
-
       def push_module(name : String)
         @module_scope << name
       end
@@ -108,10 +90,6 @@ module DoisC
       def current_module_scope : Array(String)
         @module_scope.dup
       end
-
-      # ============================
-      # Loop Tracking
-      # ============================
 
       def enter_loop
         @loop_depth += 1
@@ -125,10 +103,6 @@ module DoisC
         @loop_depth > 0
       end
 
-      # ============================
-      # Function Return Context
-      # ============================
-
       def with_return_type(type : Types::Type)
         old = @current_return_type
         @current_return_type = type
@@ -140,6 +114,6 @@ module DoisC
         @current_return_type
       end
     end
-    
+
   end
 end

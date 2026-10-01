@@ -1,8 +1,5 @@
 module DoisC
   module ASTData
-    # ##############################################################################################
-    #                                         - Metadata -                                          
-    # ##############################################################################################
 
     # Compiler metadata on source location of a lex token
     class SourceLocation
@@ -11,5 +8,6 @@ module DoisC
       def initialize(@line : Int32, @column : Int32)
       end
     end
+
   end
 end

@@ -1,10 +1,10 @@
 module MyModule has
 
   proc main() do
-    let b = 1 == 0;
-    print(b);
-    let c = 1 == 1;
-    print(c);
+    let pi = 3.1415;
+    let r = 12.2;
+    let area = pi * r * r;
+    print(area);
   end
-end
 
+end
