@@ -311,15 +311,17 @@ module DoisC
               return expected_type
             end
           end
-          atomic_type("Nil")
+          expr.resolved_type = atomic_type("Nil")
         when ArrayLiteral
-          verify_array_literal(expr, expected_type)
+          expr.resolved_type = verify_array_literal(expr, expected_type)
         when TupleLiteral
-          verify_tuple_literal(expr)
+          expr.resolved_type = verify_tuple_literal(expr)
         when MapLiteral
-          verify_map_literal(expr, expected_type)
+          expr.resolved_type = verify_map_literal(expr, expected_type)
         when IdentifierExpression
-          expr.resolved_type = verify_identifier_expression(expr)
+          # Do NOT remove the `return` here or Crystal's type checking
+          # will fail when verifying the expression's type
+          return expr.resolved_type = verify_identifier_expression(expr)
         when BinaryExpression
           expr.resolved_type = verify_binary(expr)
         when Call
@@ -331,14 +333,14 @@ module DoisC
         when UnaryExpression
           expr.resolved_type = verify_unary(expr)
         when Reassignment
-          verify_reassignment(expr)
+          expr.resolved_type = verify_reassignment(expr)
         else
           raise error("Unsupported expression type in verifier: #{expr.class}", expr.source_location)
         end
       end
 
       private def verify_if_expr(expr : IfExpression, expected_type : Types::Type? = nil) : Types::Type
-        branch_types = expr.branches.map do |branch|
+        branch_types : Array(Types::Type) = expr.branches.map do |branch|
           cond_type = verify_expression(branch.condition)
           unless cond_type.is_a?(Types::NominalType) && cond_type.definition.name == "Bool"
             raise error("If condition must be a Bool", branch.condition.source_location)
@@ -390,7 +392,7 @@ module DoisC
 
       private def verify_identifier_expression(expr : IdentifierExpression) : Types::Type
         type = verify_identifier(expr.identifier)
-        type
+        type.as(Types::Type)
       end
 
       private def verify_identifier(id : Identifier) : Types::Type

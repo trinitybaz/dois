@@ -383,7 +383,6 @@ module DoisC
       def parse_type_identifier(type_id : ASTData::TypeID, generics = [] of String) : Types::Type
         name = type_id.name
 
-        hajsdknasdkasd
         # If the name matches a generic in this scope, return a GenericTypeParameter
         if generics.includes?(name)
           return Types::GenericTypeParameter.new(name)
