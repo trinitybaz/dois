@@ -3,7 +3,6 @@ require "../ast_data/ast"
 
 module DoisC
   module Parsing
-        
     module LiteralParser
       private def parse_literal : Literal
         token = advance
@@ -52,7 +51,7 @@ module DoisC
           key = parse_expression
           consume(TokenType::ARROW, "expected =>, set literals not supported")
           mapping[key] = parse_expression
-          
+
           while match?(TokenType::COMMA)
             key = parse_expression
             consume(TokenType::ARROW, "expected =>, set literals not supported")
@@ -73,9 +72,8 @@ module DoisC
         end
         consume(TokenType::R_PAREN, "expected ')' to end tuple literal")
 
-        return TupleLiteral.new(items, location)
+        TupleLiteral.new(items, location)
       end
     end
-
   end
 end

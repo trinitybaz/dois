@@ -9,13 +9,13 @@ describe DoisC::TypeChecking do
           #{source}
         end
       end
-    DOIS
+      DOIS
   end
 
   it "accepts a simple valid program" do
     check <<-DOIS
       let x = 5;
-    DOIS
+      DOIS
   end
 
   it "accepts simple function usage" do
@@ -25,13 +25,13 @@ describe DoisC::TypeChecking do
       end
 
       let x = add$(1, 2);
-    DOIS
+      DOIS
   end
 
   it "rejects invalid assignment" do
     expect_type_error <<-DOIS
       let x : Int = "hello";
-    DOIS
+      DOIS
   end
 
   it "rejects invalid function call arguments" do
@@ -41,7 +41,7 @@ describe DoisC::TypeChecking do
       end
 
       let x = add$(1, "oops");
-    DOIS
+      DOIS
   end
 
   it "handles generics with Maybe" do
@@ -51,7 +51,7 @@ describe DoisC::TypeChecking do
 
       let a = Some(value = 3);
       let b : Maybe(Int) = a;
-    DOIS
+      DOIS
   end
 
   it "handles control flow returning unions" do
@@ -66,7 +66,7 @@ describe DoisC::TypeChecking do
           Some(x)
         end
       end
-    DOIS
+      DOIS
   end
 
   it "handles generic function identity" do
@@ -76,7 +76,7 @@ describe DoisC::TypeChecking do
       end
 
       let a = id$(5);
-    DOIS
+      DOIS
   end
 
   it "rejects mismatched generic usage" do
@@ -86,7 +86,7 @@ describe DoisC::TypeChecking do
       end
 
       let a : String = id$(5);
-    DOIS
+      DOIS
   end
 
   it "handles generic structs" do
@@ -95,7 +95,7 @@ describe DoisC::TypeChecking do
 
       let p = Point(x = 1, y = 2);
       let q : Point(Int) = p;
-    DOIS
+      DOIS
   end
 
   it "rejects incorrect generic struct assignment" do
@@ -104,7 +104,7 @@ describe DoisC::TypeChecking do
 
       let p = Point(x = 1, y = 2);
       let q : Point(String) = p;
-    DOIS
+      DOIS
   end
 
   it "handles nested generics" do
@@ -112,7 +112,7 @@ describe DoisC::TypeChecking do
       type Some<T> has value : T end
 
       let x = Some(value = Some(value = 5));
-    DOIS
+      DOIS
   end
 
   it "handles match expressions correctly" do
@@ -126,7 +126,7 @@ describe DoisC::TypeChecking do
           Nil => 0
         end
       end
-    DOIS
+      DOIS
   end
 
   it "rejects invalid match patterns" do
@@ -140,7 +140,7 @@ describe DoisC::TypeChecking do
           Nil => 0
         end
       end
-    DOIS
+      DOIS
   end
 
   it "rejects missing match cases if required" do
@@ -153,7 +153,7 @@ describe DoisC::TypeChecking do
           Some(value = v) => v
         end
       end
-    DOIS
+      DOIS
   end
 
   it "handles function returning generic types" do
@@ -165,7 +165,7 @@ describe DoisC::TypeChecking do
       end
 
       let x = wrap$(5);
-    DOIS
+      DOIS
   end
 
   it "rejects invalid return types" do
@@ -173,7 +173,7 @@ describe DoisC::TypeChecking do
       fn bad $ () : Int =>
         "not an int"
       end
-    DOIS
+      DOIS
   end
 
   it "handles chained function calls with types" do
@@ -187,7 +187,7 @@ describe DoisC::TypeChecking do
       end
 
       let y = double$(5);
-    DOIS
+      DOIS
   end
 
   it "enforces consistent generic usage across parameters" do
@@ -197,7 +197,7 @@ describe DoisC::TypeChecking do
       end
 
       let x = pair$(1, "oops");
-    DOIS
+      DOIS
   end
 
   it "propagates generics through multiple functions" do
@@ -211,7 +211,7 @@ describe DoisC::TypeChecking do
       end
 
       let y = wrap$(5);
-    DOIS
+      DOIS
   end
 
   it "rejects using union without matching" do
@@ -222,7 +222,7 @@ describe DoisC::TypeChecking do
       fn bad $ (m : Maybe(Int)) : Int =>
         m
       end
-    DOIS
+      DOIS
   end
 
   it "binds pattern variables with correct types" do
@@ -236,7 +236,7 @@ describe DoisC::TypeChecking do
           Nil => 0
         end
       end
-    DOIS
+      DOIS
   end
 
   it "rejects incorrect constructor field types" do
@@ -244,7 +244,7 @@ describe DoisC::TypeChecking do
       type Point<T> has x : T, y : T end
 
       let p = Point(x = 1, y = "oops");
-    DOIS
+      DOIS
   end
 
   it "handles multiple generic instantiations independently" do
@@ -255,7 +255,7 @@ describe DoisC::TypeChecking do
 
       let a = id$(5);
       let b = id$("hello");
-    DOIS
+      DOIS
   end
 
   it "rejects wrong number of arguments in function call" do
@@ -265,7 +265,7 @@ describe DoisC::TypeChecking do
       end
 
       let x = add$(1);
-    DOIS
+      DOIS
   end
 
   it "rejects wrong number of type arguments in generic type" do
@@ -273,7 +273,7 @@ describe DoisC::TypeChecking do
       type Point<T> has x : T, y : T end
 
       let p : Point = Point(x = 1, y = 2);
-    DOIS
+      DOIS
   end
 
   it "handles nested function calls with generics" do
@@ -283,20 +283,20 @@ describe DoisC::TypeChecking do
       end
 
       let x = id$(id$(5));
-    DOIS
+      DOIS
   end
 
   it "rejects incompatible binary operations" do
     expect_type_error <<-DOIS
       let x = 1 + "hello";
-    DOIS
+      DOIS
   end
 
   context "tags ast with type" do
     it "for binding" do
       ast = check <<-DOIS
         let x : Int = 1;
-      DOIS
+        DOIS
       main_proc = unwrap_main(ast)
       binding = main_proc.statements.first.as(AST::Binding)
       binding.resolved_type.should be_a(T::NominalType)
@@ -305,7 +305,7 @@ describe DoisC::TypeChecking do
     it "with simple inference" do
       ast = check <<-DOIS
         let x = 1;
-      DOIS
+        DOIS
       main_proc = unwrap_main(ast)
       binding = main_proc.statements.first.as(AST::Binding)
       binding.resolved_type.should be_a(T::NominalType)
@@ -318,14 +318,14 @@ describe DoisC::TypeChecking do
         let c = nil;
         let d = 'c';
         let e = "hello";
-      DOIS
+        DOIS
       main_proc = unwrap_main(ast)
       main_proc.statements.size.should eq(5)
       main_proc.statements.each.with_index do |s, i|
         binding = s.as(AST::Binding)
         type = binding.resolved_type.as(T::NominalType)
         type.definition.should be_a(T::AtomicTypeDefinition)
-        expected_types = %w(Int Float Nil Char String)
+        expected_types = %w[Int Float Nil Char String]
         type.to_s.should eq(expected_types[i])
       end
     end
@@ -335,7 +335,7 @@ describe DoisC::TypeChecking do
         let a = [1, 2, 3];
         let b = ('c', 2.0);
         let c = {0 => "hello", 1 => "world"};
-      DOIS
+        DOIS
       main_proc = unwrap_main(ast)
       main_proc.statements.size.should eq(3)
       main_proc.statements.each.with_index do |s, i|
@@ -350,7 +350,7 @@ describe DoisC::TypeChecking do
     it "for binary expressions" do
       ast = check <<-DOIS
         1 + 2;
-      DOIS
+        DOIS
       unwrap_expr_stmt(ast).resolved_type.to_s.should eq("Int")
     end
 
@@ -361,7 +361,7 @@ describe DoisC::TypeChecking do
         end
 
         add$(1, 2);
-      DOIS
+        DOIS
       unwrap_expr_stmt(ast).resolved_type.to_s.should eq("Int")
     end
 
@@ -372,7 +372,7 @@ describe DoisC::TypeChecking do
         end
 
         id$(5);
-      DOIS
+        DOIS
       unwrap_expr_stmt(ast).resolved_type.to_s.should eq("Int")
     end
 
@@ -381,16 +381,16 @@ describe DoisC::TypeChecking do
         type Point<T> has x : T, y : T end
 
         Point(x = 1, y = 2);
-      DOIS
+        DOIS
       unwrap_expr_stmt(ast).resolved_type.to_s.should eq("Point(Int)")
     end
 
     it "recursively" do
       ast = check <<-DOIS
         (22.6 - 2) + (2.01 * (3 / 4));
-      DOIS
+        DOIS
       walk_expressions(unwrap_expr_stmt(ast)) do |expr|
-        puts "checking #{expr.to_s}"
+        puts "checking #{expr}"
 
         expr.resolved_type.should_not be_nil
       end
@@ -410,14 +410,14 @@ describe DoisC::TypeChecking do
           0 => 1,
           1 => 10
         end;
-      DOIS
+        DOIS
       unwrap_expr_stmt(ast).resolved_type.to_s.should eq("Int")
     end
 
     it "for unary expressions" do
       ast = check <<-DOIS
         -10;
-      DOIS
+        DOIS
       unwrap_expr_stmt(ast).resolved_type.to_s.should eq("Int")
     end
 
@@ -425,7 +425,7 @@ describe DoisC::TypeChecking do
       ast = check <<-DOIS
         let x : Int = 10;
         x;
-      DOIS
+        DOIS
       unwrap_expr_stmt(ast).resolved_type.to_s.should eq("Int")
     end
   end
@@ -435,35 +435,35 @@ context "edge case type checking" do
   it "rejects empty literal collections without type context" do
     expect_type_error <<-DOIS
       let x = [];
-    DOIS
+      DOIS
     expect_type_error <<-DOIS
       let x = {};
-    DOIS
+      DOIS
   end
 
   it "accepts empty literal ccollections with type context" do
     check <<-DOIS
       let x : Array(Int) = [];
       let y : Map(String, Char) = {};
-    DOIS
+      DOIS
   end
 
   it "rejects empty array without type context" do
     expect_type_error <<-DOIS
       let x = [];
-    DOIS
+      DOIS
   end
 
   it "rejects empty map without type context" do
     expect_type_error <<-DOIS
       let x = {};
-    DOIS
+      DOIS
   end
 
   it "infers empty array with type annotation" do
     ast = check <<-DOIS
       let x : Array(Int) = [];
-    DOIS
+      DOIS
     binding = unwrap_main(ast).statements.first.as(AST::Binding)
     binding.resolved_type.to_s.should eq("Array(Int)")
   end
@@ -471,7 +471,7 @@ context "edge case type checking" do
   it "infers empty map with type annotation" do
     ast = check <<-DOIS
       let x : Map(String, Int) = {};
-    DOIS
+      DOIS
     binding = unwrap_main(ast).statements.first.as(AST::Binding)
     binding.resolved_type.to_s.should eq("Map(String, Int)")
   end
@@ -480,14 +480,14 @@ context "edge case type checking" do
     expect_type_error <<-DOIS
       type Box<T> has value : T end
       let x : Box(Box(Int)) = Box(value = Box(value = "oops"));
-    DOIS
+      DOIS
   end
 
   it "rejects using generic type without arguments" do
     expect_type_error <<-DOIS
       type Box<T> has value : T end
       let x : Box = Box(value = 5);
-    DOIS
+      DOIS
   end
 
   it "rejects pattern matching with wrong types" do
@@ -496,7 +496,7 @@ context "edge case type checking" do
       match Some(value = 5) then
         Some(value = v) => v + "oops"
       end;
-    DOIS
+      DOIS
   end
 
   it "requires exhaustiveness for union types in match" do
@@ -506,14 +506,14 @@ context "edge case type checking" do
       match Some(value = 5) then
         Some(value = v) => v
       end;
-    DOIS
+      DOIS
   end
 
   it "infers types for nested expressions" do
     ast = check <<-DOIS
       type Some<T> has value : T end
       let x = Some(value = Some(value = 5));
-    DOIS
+      DOIS
     binding = unwrap_main(ast).statements.first.as(AST::Binding)
     type = binding.resolved_type.as(T::NominalType)
     type.definition.name.should eq("Some")
@@ -529,6 +529,6 @@ context "edge case type checking" do
         5
       end
       do_thing$();
-    DOIS
+      DOIS
   end
 end

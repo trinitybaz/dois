@@ -1,11 +1,9 @@
 # require "../spec_helper"
 
-
-
 # describe DoisC::Parsing do
 #   it "parses a simple let binding" do
-#     ast = parse <<-DOIS 
-#       let x = 2; 
+#     ast = parse <<-DOIS
+#       let x = 2;
 #     DOIS
 #     stmt = ast.procedure.statements.first
 #     stmt.should be_a(AST::Binding)
@@ -18,7 +16,7 @@
 #     stmt.should be_a(AST::VarDeclaration)
 #   end
 #   it "parses a simple type annotation" do
-#     ast = parse <<-DOIS 
+#     ast = parse <<-DOIS
 #       let x : Int = 2;
 #     DOIS
 #     stmt = ast.procedure.statements.first
@@ -145,7 +143,7 @@
 #       fn add $ (a : Int) : Int =>
 #     DOIS
 #   end
-  
+
 #   it "handles empty function call arguments" do
 #     ast = parse("let x = f$();")
 #     stmt = ast.procedure.statements.first.as(AST::Binding)

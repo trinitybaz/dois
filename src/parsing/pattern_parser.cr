@@ -4,7 +4,6 @@
 module DoisC
   module Parsing
     module PatternParser
-
       private def parse_if_let_statement(location : SourceLocation) : IfLetStatement
         pattern = parse_pattern
         consume(TokenType::EQ, "expected `=` to pattern match in `if let`")
@@ -12,16 +11,16 @@ module DoisC
         consume(TokenType::DO, "expected `do` in before `if let` body")
         body = parse_procedure(TokenType::ELSE, TokenType::END)
         else_body = if match?(TokenType::ELSE)
-          parse_procedure(TokenType::END)
-        end
+                      parse_procedure(TokenType::END)
+                    end
         consume(TokenType::END, "expected `end` to end `if let` statement")
-        
-        return IfLetStatement.new(pattern, scrutinee, body, else_body, location)
+
+        IfLetStatement.new(pattern, scrutinee, body, else_body, location)
       end
 
       private def parse_match_expression : MatchExpression
         match_token = consume(TokenType::MATCH, "expected `match` to begin match expression")
-        scrutinee = parse_expression 
+        scrutinee = parse_expression
 
         then_token = consume(TokenType::THEN, "expected `then` before branches in match expression")
         branches = [] of MatchBranch
@@ -30,22 +29,22 @@ module DoisC
           branches << parse_match_branch(location(comma_token))
         end
         consume(TokenType::END, "expected `end` to end `match` expression")
-        return MatchExpression.new(scrutinee, branches, location(match_token))
+        MatchExpression.new(scrutinee, branches, location(match_token))
       end
 
       private def parse_match_branch(location : SourceLocation) : MatchBranch
         pattern = parse_pattern
         consume(TokenType::ARROW, "expected `=>` after pattern match")
         body = parse_expression
-        return MatchBranch.new(pattern, body, location)
+        MatchBranch.new(pattern, body, location)
       end
 
       private def parse_pattern : Pattern
         token = peek
         case token.type
         when TokenType::INT_LITERAL, TokenType::FLOAT_LITERAL, TokenType::STRING_LITERAL,
-            TokenType::CHAR_LITERAL, TokenType::TRUE, TokenType::FALSE, TokenType::NIL,
-            TokenType::L_BRACK, TokenType::L_BRACE
+             TokenType::CHAR_LITERAL, TokenType::TRUE, TokenType::FALSE, TokenType::NIL,
+             TokenType::L_BRACK, TokenType::L_BRACE
           literal = parse_literal
           LiteralPattern.new(literal, literal.source_location)
         when TokenType::UNDERSCORE
@@ -72,15 +71,14 @@ module DoisC
           patterns << parse_pattern
         end
         consume(TokenType::R_PAREN, "expected ')' to end tuple match expression")
-        return TuplePattern.new(patterns, location(token))
+        TuplePattern.new(patterns, location(token))
       end
-
 
       private def parse_variant_pattern : VariantPattern
         token = consume(TokenType::IDENTIFIER, "expected type variant name in if let pattern match")
         variant_name = token.lexeme
         field_patterns = parse_field_patterns
-        return VariantPattern.new(variant_name, field_patterns, location(token))
+        VariantPattern.new(variant_name, field_patterns, location(token))
       end
 
       private def parse_field_patterns : Array(NamedFieldPattern)
@@ -92,19 +90,17 @@ module DoisC
           end
           consume(TokenType::R_PAREN, "expected `)` to end field patterns")
         end
-        return field_patterns
+        field_patterns
       end
 
       private def parse_field_pattern : NamedFieldPattern
         field_token = consume(TokenType::IDENTIFIER, "expected field name in pattern match")
         field_name = field_token.lexeme
-        
+
         token = consume(TokenType::EQ, "expected `=` after pattern in field deconstruction")
         pattern = parse_pattern
         NamedFieldPattern.new(field_name, pattern, location(token))
       end
-
     end
-
   end
 end

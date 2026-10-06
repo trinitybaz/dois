@@ -39,7 +39,7 @@ module DoisC
         @at_line_start = false unless input.empty?
       end
 
-      def with_indent
+      def with_indent(&)
         indent
         yield
         dedent

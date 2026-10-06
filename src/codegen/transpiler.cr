@@ -7,7 +7,6 @@ module DoisC
     # This layer should NOT walk expressions itself anymore.
     # It should only orchestrate the specialized emitters.
     class Transpiler < BaseCodegen
-
       def initialize(io : IO::Memory)
         @emitter = Emitter.new(io)
         @type_codegen = TypeCodegen.new(@emitter)
@@ -29,7 +28,6 @@ module DoisC
         emit_c_main
         out
       end
-
 
       private def emit_c_declarations(ast : ASTData::AST)
         found_main = false
@@ -61,7 +59,7 @@ module DoisC
 
       private def emit_c_main
         writeln "int main(void) {"
-        with_indent do 
+        with_indent do
           writeln "dois_runtime_init();"
           writeln "dois_main();"
           writeln "dois_runtime_shutdown();"

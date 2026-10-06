@@ -7,6 +7,8 @@ class CompilationError < Exception
   end
 
   def put_backtrace
-    backtrace.each do |ln| puts ln end
+    backtrace.each do |ln|
+      puts ln
+    end
   end
 end

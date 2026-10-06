@@ -40,7 +40,7 @@ module DoisC
       end
 
       def to_s : String
-        "(#{param_types.map(&.to_s).join(", ")}) -> #{return_type.to_s}"
+        "(#{param_types.map(&.to_s).join(", ")}) -> #{return_type}"
       end
 
       def ==(other : Type) : Bool

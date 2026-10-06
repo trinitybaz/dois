@@ -2,7 +2,6 @@ require "../compilation_error"
 
 module DoisC
   module TypeChecking
-
     # Base class for all type-related errors.
     # Inherits from CompilationError to integrate with the compiler error handling.
     class TypeError < CompilationError
@@ -19,6 +18,5 @@ module DoisC
     # Raised when a type check fails during AST verification.
     class TypeVerificationError < TypeError
     end
-
   end
 end

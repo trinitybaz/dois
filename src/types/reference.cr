@@ -1,6 +1,5 @@
 module DoisC
   module Types
-
     # Base class for all type references in the system.
     # Used to represent a type in the AST before it is fully resolved.
     abstract class TypeReference
@@ -35,13 +34,12 @@ module DoisC
     # generics lists any type parameters declared for the function.
     class FunctionTypeReference < StructuralTypeReference
       # TODO higher level functions require param and return typerefs to be any typeref not just nominal
-      getter param_type_refs : Hash(String, NominalTypeReference) 
+      getter param_type_refs : Hash(String, NominalTypeReference)
       getter return_type_ref : NominalTypeReference
       getter generics : Array(String)
 
       def initialize(@param_type_refs : Hash(String, NominalTypeReference), @return_type_ref : NominalTypeReference, @generics : Array(String))
       end
     end
-
   end
 end

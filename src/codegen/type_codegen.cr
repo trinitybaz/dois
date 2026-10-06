@@ -1,7 +1,6 @@
 module DoisC
   module Codegen
     class TypeCodegen < BaseCodegen
-
       def initialize(@emitter : Emitter)
       end
 
@@ -36,7 +35,7 @@ module DoisC
         with_indent do
           decl.fields.each do |field|
             field_type = !field.resolved_type.nil? ? c_type(field.resolved_type.not_nil!) : "void*"
-            
+
             writeln "#{field_type} #{field.name};"
           end
         end

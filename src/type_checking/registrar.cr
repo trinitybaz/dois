@@ -3,7 +3,6 @@ require "./type_error"
 
 module DoisC
   module TypeChecking
-    
     # The Registrar is responsible for the initial registration of all type declarations
     # found in the AST. Its main role is to create stubs for atomic, product, and union types
     # in the global environment before full type resolution occurs. This allows the resolver
@@ -36,12 +35,11 @@ module DoisC
 
       private def error(message : String, source_location : SourceLocation)
         TypeRegistrationError.new(
-          "#{source_location.line}:#{source_location.column} : #{message}", 
-          source_location.line, 
+          "#{source_location.line}:#{source_location.column} : #{message}",
+          source_location.line,
           source_location.column
         )
       end
     end
-    
   end
 end

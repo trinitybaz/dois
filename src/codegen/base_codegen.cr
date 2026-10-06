@@ -29,7 +29,6 @@ module DoisC
       protected def out
         emitter.to_s
       end
-      
     end
   end
 end

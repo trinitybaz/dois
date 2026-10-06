@@ -30,7 +30,7 @@ module DoisC
         case ref
         when Types::NominalTypeReference
           # Only NominalTypeReference has a name
-          if (g = generic_scope[ref.name]?)
+          if g = generic_scope[ref.name]?
             return g
           end
 
@@ -286,7 +286,7 @@ module DoisC
 
         case type
         when Types::TypeVariable
-          return type == var
+          type == var
         when Types::NominalType
           type.type_args.any? { |t| occurs_in_type(var, t) }
         when Types::FunctionType
@@ -351,7 +351,7 @@ module DoisC
           # If the names match, allow generic-to-instantiated unification
           if a.definition.name == b.definition.name
             if a.type_args.size != b.type_args.size
-              raise error("Type argument mismatch #{a.to_s} vs #{b.to_s}", loc)
+              raise error("Type argument mismatch #{a} vs #{b}", loc)
             end
             a.type_args.each_with_index do |t, i|
               unify(t, b.type_args[i], loc)
@@ -360,7 +360,7 @@ module DoisC
           end
 
           # If names differ, it's a type mismatch
-          raise error("Type mismatch #{a.to_s} is not #{b.to_s}", loc)
+          raise error("Type mismatch #{a} is not #{b}", loc)
         end
 
         # function types
@@ -377,7 +377,7 @@ module DoisC
           return
         end
 
-        raise error("Cannot unify #{a.to_s} with #{b.to_s}", loc)
+        raise error("Cannot unify #{a} with #{b}", loc)
       end
 
       def parse_type_identifier(type_id : ASTData::TypeID, generics = [] of String) : Types::Type

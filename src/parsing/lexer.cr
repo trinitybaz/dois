@@ -1,12 +1,9 @@
 require "../ast_data/token"
 
-
 module DoisC
   module Parsing
-
     # Lexes source Dois code into stream of tokens for the Parser to parse into an AST
     class Lexer
-      
       def initialize(@source : String)
         @current = 0 # index
         @line = 1
@@ -15,14 +12,14 @@ module DoisC
 
       def lex : Array(Token)
         tokens = [] of Token
-        while true
+        loop do
           pass_whitespace
           break if eof?
           tokens << single_lex(advance)
         end
 
         tokens << new_token(TokenType::EOF, "")
-        return tokens
+        tokens
       end
 
       private def single_lex(c : Char) : Token
@@ -66,7 +63,7 @@ module DoisC
         when '-'
           if match?('=')
             new_token(TokenType::SUB_ASSIGN, "-=")
-          else  
+          else
             new_token(TokenType::SUB, "-")
           end
         when '*'
@@ -150,7 +147,7 @@ module DoisC
         when '?'
           new_token(TokenType::QUESTION, "?")
         when '0'..'9'
-          number_token(c) 
+          number_token(c)
         when 'a'..'z', 'A'..'Z', '_'
           identifier_token(c)
         when '"'
@@ -169,20 +166,27 @@ module DoisC
       private def advance : Char
         c = @source[@current]
         @current += 1
-        if c == '\n' @line += 1; @column = 1
-        else @column += 1 end
-        return c
+        if c == '\n'
+          @line += 1; @column = 1
+        else
+          @column += 1
+        end
+        c
       end
 
       # Int or Float literal
-      private def number_token(first_char : Char) : Token 
+      private def number_token(first_char : Char) : Token
         start = @current - 1
         while !eof? && (peek.number? || peek == '.')
           advance
         end
         lexeme = @source[start...@current]
-        type = if lexeme.includes?('.') TokenType::FLOAT_LITERAL else TokenType::INT_LITERAL end
-        return new_token(type, lexeme)
+        type = if lexeme.includes?('.')
+                 TokenType::FLOAT_LITERAL
+               else
+                 TokenType::INT_LITERAL
+               end
+        new_token(type, lexeme)
       end
 
       # keyword or identifier/operator token
@@ -193,7 +197,7 @@ module DoisC
         end
         lexeme = @source[start...@current]
         type = ASTData::KEYWORDS[lexeme]? || TokenType::IDENTIFIER
-        return new_token(type, lexeme)
+        new_token(type, lexeme)
       end
 
       private def char_token : Token
@@ -203,7 +207,7 @@ module DoisC
           raise error("character literal cannot have more than one character")
         end
         advance
-        return new_token(TokenType::CHAR_LITERAL, "#{ch}")
+        new_token(TokenType::CHAR_LITERAL, "#{ch}")
       end
 
       private def string_token : Token
@@ -219,15 +223,17 @@ module DoisC
         end
         lexeme = @source[start...@current]
         advance
-        return new_token(TokenType::STRING_LITERAL, lexeme)
+        new_token(TokenType::STRING_LITERAL, lexeme)
       end
 
       # tries to match expected and consumes if so
       private def match?(expected : Char) : Bool
-        if !eof? && @source[@current] == expected 
+        if !eof? && @source[@current] == expected
           @current += 1
           true
-        else false end
+        else
+          false
+        end
       end
 
       private def peek : Char
@@ -236,19 +242,18 @@ module DoisC
 
       private def pass_whitespace
         until eof?
-          case peek 
-          when ' ' , '\t' , '\n' , '\r'
+          case peek
+          when ' ', '\t', '\n', '\r'
             advance
           when '#' # only line based comments allowed for now
             until match?('\n') || eof?
               advance
             end
-          else 
-            break 
+          else
+            break
           end
         end
       end
-
 
       private def eof?
         @current >= @source.size
@@ -258,8 +263,6 @@ module DoisC
       private def error(message : String) : ParseError
         ParseError.new(message, @line, @column)
       end
-
     end
-
   end
 end

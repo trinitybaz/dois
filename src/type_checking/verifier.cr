@@ -280,7 +280,7 @@ module DoisC
 
           unless engine.is_assignable?(value_type, annotation_type)
             raise error(
-              "Type mismatch in binding '#{name}': expected #{annotation_type.to_s}, got #{value_type.to_s}",
+              "Type mismatch in binding '#{name}': expected #{annotation_type}, got #{value_type}",
               type_id.source_location
             )
           end
@@ -296,15 +296,15 @@ module DoisC
       private def verify_expression(expr : Expression, expected_type : Types::Type? = nil) : Types::Type
         case expr
         when IntLiteral
-          return expr.resolved_type = atomic_type("Int")
+          expr.resolved_type = atomic_type("Int")
         when FloatLiteral
-          return expr.resolved_type = atomic_type("Float")
+          expr.resolved_type = atomic_type("Float")
         when BoolLiteral
-          return expr.resolved_type = atomic_type("Bool")
+          expr.resolved_type = atomic_type("Bool")
         when CharLiteral
-          return expr.resolved_type = atomic_type("Char")
+          expr.resolved_type = atomic_type("Char")
         when StringLiteral
-          return expr.resolved_type = atomic_type("String")
+          expr.resolved_type = atomic_type("String")
         when NilLiteral
           if expected_type && expected_type.is_a?(Types::NominalType)
             if expected_type.definition.is_a?(Types::UnionTypeDefinition)
@@ -313,25 +313,25 @@ module DoisC
           end
           atomic_type("Nil")
         when ArrayLiteral
-          return verify_array_literal(expr, expected_type)
+          verify_array_literal(expr, expected_type)
         when TupleLiteral
-          return verify_tuple_literal(expr)
+          verify_tuple_literal(expr)
         when MapLiteral
-          return verify_map_literal(expr, expected_type)
+          verify_map_literal(expr, expected_type)
         when IdentifierExpression
-          return expr.resolved_type = verify_identifier_expression(expr)
+          expr.resolved_type = verify_identifier_expression(expr)
         when BinaryExpression
-          return expr.resolved_type = verify_binary(expr)
+          expr.resolved_type = verify_binary(expr)
         when Call
-          return expr.resolved_type = verify_call(expr)
+          expr.resolved_type = verify_call(expr)
         when IfExpression
-          return expr.resolved_type = verify_if_expr(expr, expected_type)
+          expr.resolved_type = verify_if_expr(expr, expected_type)
         when MatchExpression
-          return expr.resolved_type = verify_match(expr, expected_type)
+          expr.resolved_type = verify_match(expr, expected_type)
         when UnaryExpression
-          return expr.resolved_type = verify_unary(expr)
+          expr.resolved_type = verify_unary(expr)
         when Reassignment
-          return verify_reassignment(expr)
+          verify_reassignment(expr)
         else
           raise error("Unsupported expression type in verifier: #{expr.class}", expr.source_location)
         end
@@ -418,7 +418,7 @@ module DoisC
           end
           # Check if it's a global function or procedure
           if type.nil?
-            if (func_def = global.function_definition(id.name))
+            if func_def = global.function_definition(id.name)
               begin
                 generic_scope = {} of String => Types::GenericTypeParameter
                 func_def.generics.each do |g|
@@ -465,8 +465,6 @@ module DoisC
                   field_ref = variant_def.fields[accessor_name]?
                   if field_ref
                     engine.resolve_reference_to_type(field_ref, @ctx.current_generic_scope)
-                  else
-                    nil
                   end
                 else
                   nil
@@ -684,19 +682,19 @@ module DoisC
           numeric_types = ["Int", "Float"]
           if numeric_types.includes?(left_nominal.definition.name) && numeric_types.includes?(right_nominal.definition.name)
             result_type = (left_nominal.definition.name == "Float" || right_nominal.definition.name == "Float") ? "Float" : "Int"
-            return atomic_type(result_type)
+            atomic_type(result_type)
           else
             raise error("Arithmetic operator #{expr.operator} applied to non-numeric types: #{left_nominal.definition.name}, #{right_nominal.definition.name}", expr.source_location)
           end
         when ASTData::OperatorType::EQ, ASTData::OperatorType::LT
           # TODO implement when EQ for not nomminal types (i.e. recurse)
           if left_nominal.definition.name == right_nominal.definition.name
-            return atomic_type("Bool")
+            atomic_type("Bool")
           else
             raise error("Boolean operator #{expr.operator} applied to two different types; left: #{left_nominal.definition.name}, right: #{right_nominal.definition.name}", expr.source_location)
           end
         else
-          raise error("Unsupported binary operator #{expr.operator.to_s}", expr.source_location)
+          raise error("Unsupported binary operator #{expr.operator}", expr.source_location)
         end
       end
 
@@ -709,13 +707,13 @@ module DoisC
                  operand_type.definition.name == "Bool"
             raise error("Unary NOT requires Bool operand", expr.right.source_location)
           end
-          return atomic_type("Bool")
+          atomic_type("Bool")
         when ASTData::TokenType::SUB
           unless operand_type.is_a?(Types::NominalType) &&
                  ["Int", "Float"].includes?(operand_type.definition.name)
             raise error("Unary - requires numeric operand", expr.right.source_location)
           end
-          return operand_type
+          operand_type
         else
           raise error("Unsupported unary operator #{expr.operator}", expr.source_location)
         end
@@ -897,7 +895,7 @@ module DoisC
           else
             # Otherwise, resolve expected_ref to a type and compare
             expected_type =
-              if (g = @ctx.lookup_generic(expected_ref.name))
+              if g = @ctx.lookup_generic(expected_ref.name)
                 g
               else
                 type_def = global.type_definition(expected_ref) ||

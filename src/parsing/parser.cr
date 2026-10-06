@@ -13,7 +13,7 @@ require "./procedure_parser"
 module DoisC
   module Parsing
     include ASTData
-    
+
     class Parser
       include ExpressionParser
       include ProcedureParser
@@ -35,7 +35,7 @@ module DoisC
 
       private def consume(type : TokenType, message : String) : Token
         if peek.type == type
-          return advance
+          advance
         else
           bad_token = peek
           raise error(message, bad_token)
@@ -64,13 +64,12 @@ module DoisC
       private def new_node(node : Node, token : Token) : Node
         node.line = token.line
         node.column = token.column
-        return node
+        node
       end
 
       private def error(message, bad_token : Token) : ParseError
         ParseError.new("#{bad_token.line}:#{bad_token.column} : unexpected #{bad_token.lexeme}, #{message}", bad_token.line, bad_token.column)
       end
     end
-
   end
 end

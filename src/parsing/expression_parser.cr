@@ -34,7 +34,7 @@ module DoisC
           left = parse_binary_expression(left, operator, right)
         end
 
-        return left
+        left
       end
 
       private def parse_variable_identifier : Identifier
@@ -59,7 +59,7 @@ module DoisC
         while match?(TokenType::PERIOD)
           accessor_names << consume(TokenType::IDENTIFIER, "expect identifier for accessor name").lexeme
         end
-        return Identifier.new(name, module_names, accessor_names, location(token))
+        Identifier.new(name, module_names, accessor_names, location(token))
       end
 
       private def parse_binary_expression(left : Expression, operator : Token, right : Expression) : Expression
@@ -71,15 +71,15 @@ module DoisC
           end
           var_id = var_expr.identifier
           if operator.type == TokenType::EQ
-            return Reassignment.new(var_id, right, var_id.source_location)
+            Reassignment.new(var_id, right, var_id.source_location)
           else
             operator.type = desugar_assign_operator(operator.type)
             parsed_operator = parse_operator(operator)
             binary_expr = BinaryExpression.new(var_expr, parsed_operator, right, var_id.source_location)
-            return Reassignment.new(var_id, binary_expr, var_id.source_location)
+            Reassignment.new(var_id, binary_expr, var_id.source_location)
           end
         else
-          return BinaryExpression.new(left, parse_operator(operator), right, left.source_location)
+          BinaryExpression.new(left, parse_operator(operator), right, left.source_location)
         end
       end
 
@@ -127,7 +127,7 @@ module DoisC
             expr = parse_tuple_literal(expr, location(l_paren_token))
           else
             consume(TokenType::R_PAREN, "expected ')' to match '(' in expression")
-            return expr
+            expr
           end
         else
           raise error("invalid token in expression", peek)
@@ -139,28 +139,28 @@ module DoisC
         identifier_expr = IdentifierExpression.new(variable, variable.source_location)
 
         if peek.type == TokenType::L_PAREN
-          return parse_procedure_call(identifier_expr, variable.source_location)
+          parse_procedure_call(identifier_expr, variable.source_location)
         elsif match?(TokenType::FN_APPLY)
-          return parse_function_call(identifier_expr, variable.source_location)
+          parse_function_call(identifier_expr, variable.source_location)
         else
-          return identifier_expr
+          identifier_expr
         end
       end
 
       private def desugar_assign_operator(type : TokenType) : TokenType
         token_type = DESUGARED_ASSIGN_OPERATORS[type]?
         return token_type if token_type
-        return TokenType::EOF # fallback so we have some tokentype to return, should never happen
+        TokenType::EOF # fallback so we have some tokentype to return, should never happen
       end
 
       private def parse_procedure_call(callee : Expression, location : SourceLocation) : ProcedureCall
         arguments = parse_arguments
-        return ProcedureCall.new(callee, arguments, location)
+        ProcedureCall.new(callee, arguments, location)
       end
 
       private def parse_function_call(callee : Expression, location : SourceLocation) : FunctionCall
         arguments = parse_arguments
-        return FunctionCall.new(callee, arguments, location)
+        FunctionCall.new(callee, arguments, location)
       end
 
       private def parse_arguments : Array(Expression)
@@ -174,7 +174,7 @@ module DoisC
           end
           consume(TokenType::R_PAREN, "expected ')' to end args in expression")
         end
-        return arguments
+        arguments
       end
 
       private def parse_if_expression : IfExpression
@@ -197,13 +197,11 @@ module DoisC
         else_body = if peek.type == TokenType::ELSE
                       advance # TokenType::ELSE
                       parse_expression
-                    else
-                      nil
                     end
 
         consume(TokenType::END, "expected 'end' to end if expression")
 
-        return IfExpression.new(branches, else_body, location(if_token))
+        IfExpression.new(branches, else_body, location(if_token))
       end
 
       private def parse_infix(left : Expression) : Expression
@@ -211,7 +209,7 @@ module DoisC
         precedence = EXPR_PRECEDENCE[operator.type]
         right = parse_expression(precedence)
 
-        return BinaryExpression.new(left, parse_operator(operator), right, left.source_location)
+        BinaryExpression.new(left, parse_operator(operator), right, left.source_location)
       end
 
       private def precedence_of(type : TokenType) : Int32

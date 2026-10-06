@@ -3,7 +3,6 @@ require "../types/reference"
 
 module DoisC
   module TypeChecking
-    
     # The Resolver is responsible for filling in detailed type information
     # for all registered type stubs in the global environment. After the Registrar
     # has created stubs for all product, union, and atomic types, the Resolver
@@ -36,7 +35,7 @@ module DoisC
       # Resolves field types and constructor type for a product type
       def resolve_product(decl : ProductTypeDeclaration)
         ref = @env.type_reference(decl.name) || raise error("Unregistered type reference #{decl.name}", decl.source_location)
-        
+
         fields = decl.fields.to_h do |field|
           {field.name, parse_type_identifier(field.type_id, decl.generics)}
         end
@@ -65,7 +64,7 @@ module DoisC
       # Resolves function parameter and return types.
       def resolve_function(decl : FunctionDeclaration)
         name = decl.name
-        param_refs = decl.params.to_h { |p| { p.name, parse_type_identifier(p.type_id, decl.generics)} }
+        param_refs = decl.params.to_h { |p| {p.name, parse_type_identifier(p.type_id, decl.generics)} }
         return_ref = NominalTypeReference.new(decl.return_type_id.name)
         function_type_ref = FunctionTypeReference.new(param_refs, return_ref, decl.generics)
         definition = FunctionDefinition.new(name, function_type_ref)
@@ -77,7 +76,7 @@ module DoisC
       # Procedures are stored as functions with a Result return type.
       def resolve_procedure(decl : ProcedureDeclaration)
         name = decl.name
-        param_refs = decl.params.to_h { |p| { p.name, parse_type_identifier(p.type_id)} }
+        param_refs = decl.params.to_h { |p| {p.name, parse_type_identifier(p.type_id)} }
         return_ref = NominalTypeReference.new("Result")
         # TODO improve result stubbing for procedures to be woven in between type checker layers better
         procedure_type_ref = FunctionTypeReference.new(param_refs, return_ref, decl.generics)
@@ -105,12 +104,11 @@ module DoisC
 
       private def error(message : String, source_location : SourceLocation)
         TypeResolutionError.new(
-          "#{source_location.line}:#{source_location.column} : #{message}", 
-          source_location.line, 
+          "#{source_location.line}:#{source_location.column} : #{message}",
+          source_location.line,
           source_location.column
         )
       end
     end
-    
   end
 end

@@ -4,7 +4,6 @@ module DoisC
   module Parsing
     # Parses declaration of bindings, variables, modules, functions, procedures, and types.
     module DeclarationParser
-      
       private def parse_module_declaration : ModuleDeclaration
         token = consume(TokenType::MODULE, "expected `module` to begin module declaration")
         name = consume(TokenType::IDENTIFIER, "expected module name identifier").lexeme
@@ -14,12 +13,16 @@ module DoisC
           statement = parse_statement
           statements << statement if statement
         end
-        return ModuleDeclaration.new(name, statements, location(token))
+        ModuleDeclaration.new(name, statements, location(token))
       end
 
       def parse_type_identifier(location : SourceLocation) : TypeID
         inner_types = [] of TypeID
-        name = if t = match?(TokenType::IDENTIFIER); t.lexeme else "Tuple" end
+        name = if t = match?(TokenType::IDENTIFIER)
+                 t.lexeme
+               else
+                 "Tuple"
+               end
 
         if match?(TokenType::L_PAREN)
           inner_types << parse_type_identifier(location)
@@ -32,36 +35,35 @@ module DoisC
           inner_types = [TypeID.new(name, inner_types, location)]
           name = "Maybe"
         end
-        return TypeID.new(name, inner_types, location)
+        TypeID.new(name, inner_types, location)
       end
 
-      private def parse_binding : Statement 
+      private def parse_binding : Statement
         token = consume(TokenType::IDENTIFIER, "expected binding identifier name")
         name = token.lexeme
         type_identifier = if colon_token = match?(TokenType::COLON)
-          parse_type_identifier(location(colon_token))
-        else nil end
+                            parse_type_identifier(location(colon_token))
+                          end
         consume(TokenType::EQ, "expected '=' after binding name")
         value_expr = parse_expression
         consume(TokenType::SEMICOLON, "expected ';' after binding value")
-        return Binding.new(name, value_expr, type_identifier, location(token))
+        Binding.new(name, value_expr, type_identifier, location(token))
       end
 
       private def parse_var_declaration : Statement
         token = consume(TokenType::IDENTIFIER, "expected variable identifier name")
         name = token.lexeme
-        
+
         type_identifier = if colon_token = match?(TokenType::COLON)
-          parse_type_identifier(location(colon_token))
-        else nil end
+                            parse_type_identifier(location(colon_token))
+                          end
 
         value_expr = if match?(TokenType::EQ)
-          parse_expression
-        else nil end
+                       parse_expression
+                     end
         consume(TokenType::SEMICOLON, "expected ';' after declaring var")
-        return VarDeclaration.new(name, value_expr, type_identifier, location(token)) 
+        VarDeclaration.new(name, value_expr, type_identifier, location(token))
       end
-
 
       private def parse_function_declaration : FunctionDeclaration
         token = consume(TokenType::FN, "expected `fn` to begin function declaration")
@@ -70,13 +72,13 @@ module DoisC
         consume(TokenType::FN_APPLY, "expected '$' after function name")
         parameters = parse_parameters
         colon_token = consume(TokenType::COLON, "expected ':' followed by function return type annotation")
-        
+
         return_type_identifier = parse_type_identifier(location(colon_token))
 
         consume(TokenType::ARROW, "expected => before function declaration body")
         body = parse_expression
         consume(TokenType::END, "expected 'end' to terminate function declaration body")
-        return FunctionDeclaration.new(name, parameters, generics, body, return_type_identifier, location(token))
+        FunctionDeclaration.new(name, parameters, generics, body, return_type_identifier, location(token))
       end
 
       private def parse_parameters : Array(Parameter)
@@ -90,7 +92,7 @@ module DoisC
           end
           consume(TokenType::R_PAREN, "expected ')' to end fuction args list")
         end
-        return parameters
+        parameters
       end
 
       private def parse_parameter : Parameter
@@ -110,7 +112,7 @@ module DoisC
         consume(TokenType::DO, "expected 'do' after before procedure declaration body")
         body = parse_procedure(TokenType::END)
         consume(TokenType::END, "expected 'end' to terminate function declaration body")
-        return ProcedureDeclaration.new(name, parameters, generics, body, location(token))
+        ProcedureDeclaration.new(name, parameters, generics, body, location(token))
       end
 
       private def parse_type_declaration : Declaration
@@ -133,7 +135,7 @@ module DoisC
           end
           consume(TokenType::COMP_GT, "expected '>' to end generic list")
         end
-        return generics
+        generics
       end
 
       private def parse_fields
@@ -144,7 +146,7 @@ module DoisC
           fields << parse_field
         end
         consume(TokenType::END, "expected 'end' to terminate product type declaration")
-        return fields
+        fields
       end
 
       private def parse_field : Field
@@ -152,21 +154,19 @@ module DoisC
         name = token.lexeme
         colon_token = consume(TokenType::COLON, "expected : for field type annotation")
         type_identifier = parse_type_identifier(location(colon_token))
-        return Field.new(name, type_identifier, location(token))
+        Field.new(name, type_identifier, location(token))
       end
 
       private def parse_variants(location : SourceLocation) : Array(TypeID)
         variants = [] of TypeID
-        
+
         variants << parse_type_identifier(location)
         while match?(TokenType::BAR)
           variants << parse_type_identifier(location)
         end
         consume(TokenType::END, "expected `end` to terminate union type declaration")
-        return variants
+        variants
       end
-
     end
-  
   end
 end

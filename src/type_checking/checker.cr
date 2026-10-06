@@ -7,7 +7,6 @@ require "./*"
 
 module DoisC
   module TypeChecking
-    
     # The TypeChecker is the top-level entry point for type checking an AST.
     # It orchestrates the various stages of type analysis:
     #   1. Registrar: registers all types and function signatures in the global environment.
@@ -30,6 +29,5 @@ module DoisC
         ).verify_all(ast)
       end
     end
-
   end
 end

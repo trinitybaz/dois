@@ -1,6 +1,5 @@
 module DoisC
   module ASTData
-
     # Semantic reference to a resolved symbol.
     #
     # This is backend-neutral semantic metadata attached during
@@ -26,6 +25,5 @@ module DoisC
         fully_qualified_name
       end
     end
-
   end
 end

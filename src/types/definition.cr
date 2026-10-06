@@ -2,7 +2,6 @@ require "./reference"
 
 module DoisC
   module Types
-
     # Base class for all type definitions in the system:
     # Full definition of a type, such as atomic, product, union, or function types.
     abstract class TypeDefinition
@@ -19,16 +18,16 @@ module DoisC
 
       def name : String
         case atomic
-        when Atomic::INT; "Int"
-        when Atomic::FLOAT; "Float"
-        when Atomic::NIL; "Nil"
-        when Atomic::CHAR; "Char"
+        when Atomic::INT   ; "Int"
+        when Atomic::FLOAT ; "Float"
+        when Atomic::NIL   ; "Nil"
+        when Atomic::CHAR  ; "Char"
         when Atomic::STRING; "String"
-        when Atomic::BOOL; "Bool"
-        when Atomic::ARRAY; "Array"
-        when Atomic::TUPLE; "Tuple"
-        when Atomic::MAP; "Map"
-        else raise Exception.new
+        when Atomic::BOOL  ; "Bool"
+        when Atomic::ARRAY ; "Array"
+        when Atomic::TUPLE ; "Tuple"
+        when Atomic::MAP   ; "Map"
+        else                 raise Exception.new
         end
       end
     end
@@ -96,6 +95,5 @@ module DoisC
     # A procedure, which is a function expected to return a `Result` type.
     class ProcedureDefinition < FunctionDefinition
     end
-    
   end
 end

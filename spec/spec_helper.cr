@@ -27,7 +27,6 @@ end
 
 # unwraps ast into single main procedure (likely to be changed)
 def unwrap_main(ast : DoisC::ASTData::AST) : DoisC::ASTData::Procedure
-
   main_decl = ast.module_decl.body.find do |s|
     s.is_a?(DoisC::ASTData::ProcedureDeclaration) && s.name == "main"
   end.as(DoisC::ASTData::ProcedureDeclaration)
@@ -73,8 +72,7 @@ def walk_expressions(expression : AST::Expression, &block : AST::Expression ->)
     expression.arguments.each do |arg|
       walk_expressions(arg, &block)
     end
-
-  # literals, identifiers, etc → no children
+    # literals, identifiers, etc → no children
   end
 end
 
@@ -103,7 +101,7 @@ def compile_and_run_c(source : String) : String
     )
 
     unless compile_status.success?
-      raise "C compilation failed for generated output:\n#{compile_output.to_s}"
+      raise "C compilation failed for generated output:\n#{compile_output}"
     end
 
     io = IO::Memory.new
@@ -115,7 +113,7 @@ def compile_and_run_c(source : String) : String
     )
 
     unless run_status.success?
-      raise "Generated binary exited unsuccessfully:\n#{io.to_s}"
+      raise "Generated binary exited unsuccessfully:\n#{io}"
     end
 
     io.to_s
@@ -124,7 +122,6 @@ def compile_and_run_c(source : String) : String
     File.delete(binary_path) if File.exists?(binary_path)
   end
 end
-
 
 alias TE = DoisC::TypeChecking::TypeEngine
 alias G = DoisC::Environment::Global

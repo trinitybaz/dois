@@ -492,7 +492,7 @@ module DoisC
         when OperatorType::LT
           "<"
         else
-          raise "unsupported operator #{type.to_s}"
+          raise "unsupported operator #{type}"
         end
       end
     end
