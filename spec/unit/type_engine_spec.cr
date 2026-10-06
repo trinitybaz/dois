@@ -49,7 +49,7 @@ describe DoisC::TypeChecking::TypeEngine do
       ["T"],
       {
         "x" => t_ref,
-        "y" => t_ref
+        "y" => t_ref,
       },
       point_ref
     )
@@ -63,7 +63,7 @@ describe DoisC::TypeChecking::TypeEngine do
     # create Point(T) via GenericTypeParameter and instantiate
     generic_point = engine.instantiate(
       T::NominalType.new(point_def, [
-        T::GenericTypeParameter.new("T")
+        T::GenericTypeParameter.new("T"),
       ] of T::Type)
     ).as(T::NominalType)
 
@@ -73,7 +73,7 @@ describe DoisC::TypeChecking::TypeEngine do
     concrete_point = T::NominalType.new(point_def, [int_type] of T::Type)
 
     engine.unify(generic_point, concrete_point, source_location)
-    
+
     engine.prune(t).should eq(int_type)
   end
 
@@ -118,7 +118,7 @@ describe DoisC::TypeChecking::TypeEngine do
       ["T"],
       {
         "x" => t_ref,
-        "y" => t_ref
+        "y" => t_ref,
       },
       point_ref
     )
@@ -146,7 +146,7 @@ describe DoisC::TypeChecking::TypeEngine do
       ["T"],
       {
         "x" => t_ref,
-        "y" => t_ref
+        "y" => t_ref,
       },
       point_ref
     )
@@ -185,7 +185,7 @@ describe DoisC::TypeChecking::TypeEngine do
     box_def = T::ProductTypeDefinition.new(
       "Box",
       ["T"],
-      { "value" => t_ref },
+      {"value" => t_ref},
       box_ref
     )
     global.define_type(box_ref, box_def)
@@ -213,7 +213,7 @@ describe DoisC::TypeChecking::TypeEngine do
     box_def = T::ProductTypeDefinition.new(
       "Box",
       ["T"],
-      { "value" => t_ref },
+      {"value" => t_ref},
       box_ref
     )
     global.define_type(box_ref, box_def)

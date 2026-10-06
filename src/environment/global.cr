@@ -3,11 +3,9 @@ require "../types/definition"
 
 module DoisC
   module Environment
-
     # Global semantic environment for predeclared types, builtin symbols,
     # and user-defined top-level type/function/procedure declarations.
     class Global
-
       # Canonical references
       @type_refs : Hash(String, Types::NominalTypeReference)
 
@@ -155,6 +153,5 @@ module DoisC
         @func_defs[name]?
       end
     end
-    
   end
 end

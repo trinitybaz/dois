@@ -1,7 +1,17 @@
 require "../spec_helper"
 
 describe DoisC::TypeChecking do
-  
+  # wraps input string in module and main proc for executable compilation
+  def wrap_dois_main(source : String)
+    <<-DOIS
+      module Main
+        proc main() do
+          #{source}
+        end
+      end
+    DOIS
+  end
+
   it "accepts a simple valid program" do
     check <<-DOIS
       let x = 5;
@@ -381,6 +391,7 @@ describe DoisC::TypeChecking do
       DOIS
       walk_expressions(unwrap_expr_stmt(ast)) do |expr|
         puts "checking #{expr.to_s}"
+
         expr.resolved_type.should_not be_nil
       end
     end
@@ -417,14 +428,10 @@ describe DoisC::TypeChecking do
       DOIS
       unwrap_expr_stmt(ast).resolved_type.to_s.should eq("Int")
     end
-
-
   end
-
 end
 
 context "edge case type checking" do
-
   it "rejects empty literal collections without type context" do
     expect_type_error <<-DOIS
       let x = [];
@@ -524,5 +531,4 @@ context "edge case type checking" do
       do_thing$();
     DOIS
   end
-
 end

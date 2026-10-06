@@ -6,11 +6,11 @@ require "../types/type"
 module DoisC
   # Data Representations of Abstract Syntax Tree Components
   module ASTData
-
     # Container for abstract syntax tree (AST) nodes,
     # comprised of a single `Procedure`
     class AST
       getter module_decl : ModuleDeclaration
+
       def initialize(@module_decl : ModuleDeclaration)
       end
     end
@@ -18,10 +18,10 @@ module DoisC
     # Base class that all nodes in the AST derive from
     abstract class Node
       getter source_location : SourceLocation
+
       def initialize(@source_location : SourceLocation)
       end
     end
-
 
     # Base expression class, resolves to a type
     class Expression < Node
@@ -107,7 +107,7 @@ module DoisC
     # Arguments may be positional (Expression) or named (NamedArgument)
     # Callee can be any Expression (not just Identifier), enabling chaining like a.b().c()
     abstract class Call < Expression
-      getter callee : Expression  # can now be IdentifierExpression or AccessExpression, etc.
+      getter callee : Expression           # can now be IdentifierExpression or AccessExpression, etc.
       getter arguments : Array(Expression) # may include NamedArgument
 
       def initialize(@callee : Expression, @arguments : Array(Expression), source_location : SourceLocation)
@@ -177,6 +177,7 @@ module DoisC
     # Base class for declaration of a module, identifier, function, etc.
     abstract class Declaration < Statement
       abstract def name : String
+
       property symbol_ref : SymbolRef?
 
       def qualified_name : String
@@ -205,7 +206,6 @@ module DoisC
       def initialize(@name : String, @value : Expression, @type_id : TypeID?, source_location : SourceLocation)
         super(source_location)
       end
-
     end
 
     # Declaration of a variable, i.e. `var y = 3`
@@ -432,6 +432,7 @@ module DoisC
       def initialize(@items : Array(Expression), source_location : SourceLocation)
         super(source_location)
       end
+
       def literal_type : LiteralType
         LiteralType::Array
       end
@@ -444,6 +445,7 @@ module DoisC
       def initialize(@items : Array(Expression), source_location : SourceLocation)
         super(source_location)
       end
+
       def literal_type : LiteralType
         LiteralType::Tuple
       end
@@ -466,7 +468,7 @@ module DoisC
     end
 
     enum OperatorType
-      ADD; SUB; MULT; DIV; EQ
+      ADD; SUB; MULT; DIV; EQ; LT
     end
 
     class Operator
@@ -487,6 +489,8 @@ module DoisC
           "/"
         when OperatorType::EQ
           "=="
+        when OperatorType::LT
+          "<"
         else
           raise "unsupported operator #{type.to_s}"
         end
@@ -547,7 +551,6 @@ module DoisC
       def initialize(@value : Literal, source_location : SourceLocation)
         super(source_location)
       end
-
     end
 
     # A binding match pattern, i.e. `x => x`
@@ -578,7 +581,11 @@ module DoisC
       getter name : String
       getter field_patterns : Array(NamedFieldPattern)
 
-      def initialize(@name : String, @field_patterns : Array(NamedFieldPattern), source_location : SourceLocation)
+      def initialize(
+        @name : String,
+        @field_patterns : Array(NamedFieldPattern),
+        source_location : SourceLocation,
+      )
         super(source_location)
       end
     end
@@ -601,6 +608,5 @@ module DoisC
         super(source_location)
       end
     end
-
   end
 end

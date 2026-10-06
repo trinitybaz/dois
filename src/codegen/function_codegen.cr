@@ -42,17 +42,54 @@ module DoisC
         case stmt
         when ASTData::Binding
           type = @type_codegen.c_type(stmt.resolved_type.not_nil!)
-          write "#{type} #{stmt.name} = "
+          write "const #{type} #{stmt.name} = "
           @expression_codegen.emit(stmt.value)
+        when ASTData::VarDeclaration
+          type = @type_codegen.c_type(stmt.resolved_type.not_nil!)
+          write "#{type} #{stmt.name}"
+          if value = stmt.value
+            write(" = ")
+            @expression_codegen.emit(value)
+          end
         when ASTData::ExpressionStatement
           if emit_builtin_print_statement(stmt.expression)
             return
           end
           @expression_codegen.emit(stmt.expression)
+        when ASTData::WhileLoop
+          emit_while_loop(stmt)
+        when ASTData::IfStatement
+          emit_if_statement(stmt)
         else
           writeln "/* unsupported statement: #{stmt.class} */"
         end
         writeln ";"
+      end
+
+      def emit_while_loop(stmt : DoisC::ASTData::WhileLoop)
+        write("while (")
+        @expression_codegen.emit(stmt.condition)
+        write(") {")
+        newline
+        with_indent do
+          emit_statements(stmt.body.statements)
+        end
+        write("}")
+      end
+
+      def emit_if_statement(stmt : ASTData::IfStatement)
+        stmt.branches.each do |branch|
+          write("if ")
+          @expression_codegen.emit(branch.condition)
+          write(" {")
+          emit_statements(branch.body.statements)
+          write("}")
+        end
+        if body = stmt.else_body
+          write("else {")
+          emit_statements(body.statements)
+          write("}")
+        end
       end
 
       private def emit_builtin_print_statement(expr : ASTData::Expression) : Bool

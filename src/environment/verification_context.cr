@@ -4,10 +4,8 @@ require "../ast_data/symbol_ref"
 
 module DoisC
   module Environment
-
     # Holds context as verifier traverses AST's concrete types
     class VerificationContext
-
       record LocalBinding,
         type : Types::Type,
         symbol_ref : ASTData::SymbolRef?
@@ -103,7 +101,7 @@ module DoisC
         @loop_depth > 0
       end
 
-      def with_return_type(type : Types::Type)
+      def with_return_type(type : Types::Type, &)
         old = @current_return_type
         @current_return_type = type
         yield
@@ -114,6 +112,5 @@ module DoisC
         @current_return_type
       end
     end
-
   end
 end

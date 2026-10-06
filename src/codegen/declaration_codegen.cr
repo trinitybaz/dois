@@ -25,7 +25,7 @@ module DoisC
 
       # Emit all top-level declarations in the AST
       def emit_all(ast : ASTData::AST)
-        ast.module_decl.body.each do |decl| 
+        ast.module_decl.body.each do |decl|
           case decl
           when TopLevelDecl
             emit(decl)

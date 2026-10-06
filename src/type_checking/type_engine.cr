@@ -1,8 +1,8 @@
 require "../environment/global"
 require "./error_reporter"
+
 module DoisC
   module TypeChecking
-
     # The TypeEngine provides core functionality for working with types in the Verifier.
     # It is responsible for:
     #   1. Instantiating type definitions into concrete Types with proper type arguments.
@@ -35,7 +35,7 @@ module DoisC
           end
 
           type_def = global.type_definition(ref) ||
-            raise "Unknown type reference #{ref.name}"
+                     raise "Unknown type reference #{ref.name}"
 
           # Resolve type arguments recursively
           resolved_args = ref.type_args.map do |arg_ref|
@@ -43,7 +43,6 @@ module DoisC
           end
 
           instantiate_type(type_def, resolved_args)
-
         when Types::FunctionTypeReference
           # Create a fresh substitutions hash for function generics
           substitutions = Hash(String, DoisC::Types::Type).new
@@ -61,7 +60,6 @@ module DoisC
           return_type = resolve_reference_to_type(ref.return_type_ref, substitutions)
 
           Types::FunctionType.new(param_types, return_type)
-
         else
           raise "Unsupported TypeReference #{ref.class}"
         end
@@ -103,9 +101,8 @@ module DoisC
 
         # Nil handling
         if from.is_a?(Types::NominalType) &&
-          from.definition.is_a?(Types::AtomicTypeDefinition) &&
-          from.definition.as(Types::AtomicTypeDefinition).atomic == Types::Atomic::NIL
-
+           from.definition.is_a?(Types::AtomicTypeDefinition) &&
+           from.definition.as(Types::AtomicTypeDefinition).atomic == Types::Atomic::NIL
           if to.is_a?(Types::NominalType) && to.definition.is_a?(Types::UnionTypeDefinition)
             union_def = to.definition.as(Types::UnionTypeDefinition)
             return union_def.variants.any? do |vref|
@@ -169,10 +166,8 @@ module DoisC
         case type
         when Types::TypeVariable
           acc << type unless acc.includes?(type)
-
         when Types::NominalType
           type.type_args.each { |t| collect_type_variables(t, acc) }
-
         when Types::FunctionType
           type.param_types.each { |t| collect_type_variables(t, acc) }
           collect_type_variables(type.return_type, acc)
@@ -200,17 +195,16 @@ module DoisC
         case type
         when Types::GenericTypeParameter
           fresh_type_variable
-
         when Types::NominalType
           # If the definition has generics but no type args, create fresh ones
           generics = case defn = type.definition
-          when Types::ProductTypeDefinition
-            defn.generics
-          when Types::UnionTypeDefinition
-            defn.generics
-          else
-            [] of String
-          end
+                     when Types::ProductTypeDefinition
+                       defn.generics
+                     when Types::UnionTypeDefinition
+                       defn.generics
+                     else
+                       [] of String
+                     end
 
           if generics.empty?
             return type
@@ -223,12 +217,10 @@ module DoisC
 
           new_args = generics.map { |gen| mapping[gen].as(Types::Type) }
           Types::NominalType.new(type.definition, new_args)
-
         when Types::FunctionType
           params = type.param_types.map { |t| instantiate(t).as(Types::Type) }
           ret = instantiate(type.return_type)
           Types::FunctionType.new(params, ret)
-
         else
           type
         end
@@ -239,16 +231,13 @@ module DoisC
         case type
         when Types::TypeVariable
           mapping[type]? || type
-
         when Types::NominalType
           new_args = type.type_args.map { |t| replace_type_variables(t, mapping) }
           Types::NominalType.new(type.definition, new_args)
-
         when Types::FunctionType
           params = type.param_types.map { |t| replace_type_variables(t, mapping) }
           ret = replace_type_variables(type.return_type, mapping)
           Types::FunctionType.new(params, ret)
-
         else
           type
         end
@@ -259,16 +248,13 @@ module DoisC
         case type
         when Types::GenericTypeParameter
           mapping[type.name] ||= fresh_type_variable
-
         when Types::NominalType
           new_args = type.type_args.map { |t| replace_generics_with_fresh(t, mapping) }
           Types::NominalType.new(type.definition, new_args)
-
         when Types::FunctionType
           params = type.param_types.map { |t| replace_generics_with_fresh(t, mapping) }
           ret = replace_generics_with_fresh(type.return_type, mapping)
           Types::FunctionType.new(params, ret)
-
         else
           type
         end
@@ -283,16 +269,13 @@ module DoisC
             return type.instance.not_nil!
           end
           type
-
         when Types::NominalType
           new_args = type.type_args.map { |t| prune(t) }
           Types::NominalType.new(type.definition, new_args)
-
         when Types::FunctionType
           params = type.param_types.map { |t| prune(t) }
           ret = prune(type.return_type)
           Types::FunctionType.new(params, ret)
-
         else
           type
         end
@@ -308,7 +291,7 @@ module DoisC
           type.type_args.any? { |t| occurs_in_type(var, t) }
         when Types::FunctionType
           type.param_types.any? { |t| occurs_in_type(var, t) } ||
-          occurs_in_type(var, type.return_type)
+            occurs_in_type(var, type.return_type)
         else
           false
         end
@@ -400,6 +383,7 @@ module DoisC
       def parse_type_identifier(type_id : ASTData::TypeID, generics = [] of String) : Types::Type
         name = type_id.name
 
+        hajsdknasdkasd
         # If the name matches a generic in this scope, return a GenericTypeParameter
         if generics.includes?(name)
           return Types::GenericTypeParameter.new(name)
@@ -410,16 +394,13 @@ module DoisC
               raise "Unknown type: #{name}"
 
         defn = global.type_definition(ref) ||
-              raise "Missing type definition for #{name}"
+               raise "Missing type definition for #{name}"
 
         # For generics (e.g., Maybe(Int)), recursively resolve type arguments
         type_args = type_id.inner_type_ids.map { |inner| parse_type_identifier(inner, generics).as(Types::Type) }
 
         Types::NominalType.new(defn, type_args)
       end
-
-      
-
     end
   end
 end

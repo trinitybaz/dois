@@ -3,7 +3,6 @@ require "./type_engine"
 
 module DoisC
   module TypeChecking
-    
     # The Verifier is responsible for walking the AST and checking type correctness.
     # It operates on a given VerificationContext, which provides variable scopes,
     # generic scopes, loop tracking, and the global environment.
@@ -62,11 +61,12 @@ module DoisC
           verify_while_loop(stmt)
         when Break
           verify_break(stmt)
+        when IfStatement
+          verify_if_stmt(stmt)
         else
           raise error("Unsupported statement in verifier: #{stmt.class}", stmt.source_location)
         end
       end
-
 
       private def verify_match(expr : MatchExpression, expected_type : Types::Type? = nil) : Types::Type
         matched_type = verify_expression(expr.scrutinee)
@@ -97,24 +97,21 @@ module DoisC
         case pattern
         when LiteralPattern
           verify_expression(pattern.value)
-
         when BindingPattern
           any_def = global.type_definition(global.type_reference("Any").as(Types::NominalTypeReference)) ||
                     raise error("Missing type definition for Any", pattern.source_location)
           Types::NominalType.new(any_def, [] of Types::Type)
-
         when VariantPattern
           # Resolve the variant type (e.g., Some, Ok, Err)
           variant_name = pattern.name
           type_ref = global.type_reference(variant_name).as?(Types::NominalTypeReference) ||
-            raise error("Unknown variant '#{variant_name}'", pattern.source_location)
+                     raise error("Unknown variant '#{variant_name}'", pattern.source_location)
 
           type_def = global.type_definition(type_ref) ||
-            raise error("Missing type definition for variant '#{variant_name}'", pattern.source_location)
+                     raise error("Missing type definition for variant '#{variant_name}'", pattern.source_location)
 
           # Return the nominal type for this variant (no generic instantiation yet)
           Types::NominalType.new(type_def, [] of Types::Type)
-
         else
           raise error("Unsupported pattern type #{pattern.class}", pattern.source_location)
         end
@@ -125,14 +122,13 @@ module DoisC
         when BindingPattern
           # Simple variable binding
           @ctx.declare(pattern.name, matched_type)
-
         when VariantPattern
           variant_name = pattern.name
           type_ref = global.type_reference(variant_name).as?(Types::NominalTypeReference) ||
-            raise error("Unknown variant '#{variant_name}'", pattern.source_location)
+                     raise error("Unknown variant '#{variant_name}'", pattern.source_location)
 
           type_def = global.type_definition(type_ref) ||
-            raise error("Missing type definition for variant '#{variant_name}'", pattern.source_location)
+                     raise error("Missing type definition for variant '#{variant_name}'", pattern.source_location)
 
           return unless type_def.is_a?(Types::ProductTypeDefinition)
 
@@ -161,10 +157,10 @@ module DoisC
               # If the right-hand side is an Identifier, declare its name
               if rhs.is_a?(Identifier)
                 @ctx.declare(rhs.name, field_type)
-              # If the right-hand side is a BindingPattern, declare its name
+                # If the right-hand side is a BindingPattern, declare its name
               elsif rhs.is_a?(BindingPattern)
                 @ctx.declare(rhs.name, field_type)
-              # If the right-hand side is a Pattern, recursively bind it
+                # If the right-hand side is a Pattern, recursively bind it
               elsif rhs.is_a?(Pattern)
                 bind_pattern(rhs, field_type)
               end
@@ -172,11 +168,9 @@ module DoisC
               bind_pattern(subpattern, field_type)
             end
           end
-
         when NamedFieldPattern
           field_pattern = pattern.pattern
           bind_pattern(field_pattern, matched_type)
-
         else
           # Other patterns do not introduce bindings
         end
@@ -215,7 +209,7 @@ module DoisC
         end
 
         @ctx.enter_scope
-        proc.params.each do |param| 
+        proc.params.each do |param|
           type = engine.parse_type_identifier(param.type_id, proc.generics)
           param.resolved_type = type
           @ctx.declare(param.name, type)
@@ -223,7 +217,7 @@ module DoisC
 
         # Construct a NominalType for Result before passing to with_return_type
         result_def = global.type_definition(global.type_reference("Result").as(Types::NominalTypeReference)) ||
-                    raise error("Missing type definition for Result", proc.source_location)
+                     raise error("Missing type definition for Result", proc.source_location)
         result_type = Types::NominalType.new(result_def, [] of Types::Type)
         proc.resolved_type = result_type
 
@@ -236,7 +230,7 @@ module DoisC
         @ctx.exit_scope
         @ctx.exit_generic_scope
       end
-      
+
       private def verify_var_declaration(decl : VarDeclaration)
         decl.symbol_ref ||= ASTData::SymbolRef.new(@ctx.current_module_scope, decl.name)
 
@@ -268,7 +262,6 @@ module DoisC
           @ctx.declare(decl.name, value_type, decl.symbol_ref)
         end
       end
-
 
       private def verify_binding(binding : Binding)
         binding.symbol_ref ||= ASTData::SymbolRef.new(@ctx.current_module_scope, binding.name)
@@ -332,7 +325,7 @@ module DoisC
         when Call
           return expr.resolved_type = verify_call(expr)
         when IfExpression
-          return expr.resolved_type = verify_if(expr, expected_type)
+          return expr.resolved_type = verify_if_expr(expr, expected_type)
         when MatchExpression
           return expr.resolved_type = verify_match(expr, expected_type)
         when UnaryExpression
@@ -344,7 +337,7 @@ module DoisC
         end
       end
 
-      private def verify_if(expr : IfExpression, expected_type : Types::Type? = nil) : Types::Type
+      private def verify_if_expr(expr : IfExpression, expected_type : Types::Type? = nil) : Types::Type
         branch_types = expr.branches.map do |branch|
           cond_type = verify_expression(branch.condition)
           unless cond_type.is_a?(Types::NominalType) && cond_type.definition.name == "Bool"
@@ -370,11 +363,24 @@ module DoisC
         engine.prune(result_type)
       end
 
+      private def verify_if_stmt(stmt : IfStatement)
+        stmt.branches.each do |branch|
+          branch.body.statements.each do |stmt|
+            verify_statement(stmt)
+          end
+        end
+        if body = stmt.else_body
+          body.statements.each do |stmt|
+            verify_statement(stmt)
+          end
+        end
+      end
+
       private def atomic_type(name : String) : Types::NominalType
         ref = global.type_reference(name).as?(Types::NominalTypeReference) ||
-          raise "Atomic type #{name} not registered in global env"
+              raise "Atomic type #{name} not registered in global env"
         defn = global.type_definition(ref) ||
-          raise "Atomic type definition missing for #{name}"
+               raise "Atomic type definition missing for #{name}"
         Types::NominalType.new(defn, [] of Types::Type)
       end
 
@@ -447,13 +453,12 @@ module DoisC
             case type_def
             when Types::ProductTypeDefinition
               field_ref = type_def.fields[accessor_name]? ||
-                raise error("#{type_def.name} has no field #{accessor_name}", id.source_location)
+                          raise error("#{type_def.name} has no field #{accessor_name}", id.source_location)
               type = engine.resolve_reference_to_type(field_ref, @ctx.current_generic_scope)
-
             when Types::UnionTypeDefinition
               variant_field_types = type_def.variants.compact_map do |variant_ref|
                 variant_def = global.type_definition(variant_ref) ||
-                  raise error("Unknown variant #{variant_ref.name}", id.source_location)
+                              raise error("Unknown variant #{variant_ref.name}", id.source_location)
 
                 case variant_def
                 when Types::ProductTypeDefinition
@@ -468,17 +473,15 @@ module DoisC
                 end
               end
 
-              raise error("No variant defines field '#{accessor_name}'" , id.source_location) if variant_field_types.empty?
+              raise error("No variant defines field '#{accessor_name}'", id.source_location) if variant_field_types.empty?
 
               unique = variant_field_types.uniq
               raise error("Inconsistent field types across union variants", id.source_location) if unique.size != 1
 
               type = unique.first
-
             else
               raise error("Type #{type_def.name} does not support field access", id.source_location)
             end
-
           else
             raise error("Cannot access field '#{accessor_name}' on #{type.class}", id.source_location)
           end
@@ -490,8 +493,6 @@ module DoisC
         end
         type
       end
-
-      
 
       private def verify_call(call_expr : Call) : Types::Type
         callee_expr = call_expr.callee
@@ -643,8 +644,6 @@ module DoisC
         engine.prune(func_type.return_type)
       end
 
-      
-
       private def verify_binary(expr : BinaryExpression) : Types::Type
         left_type = verify_expression(expr.left)
         right_type = verify_expression(expr.right)
@@ -689,14 +688,15 @@ module DoisC
           else
             raise error("Arithmetic operator #{expr.operator} applied to non-numeric types: #{left_nominal.definition.name}, #{right_nominal.definition.name}", expr.source_location)
           end
-        when ASTData::OperatorType::EQ
+        when ASTData::OperatorType::EQ, ASTData::OperatorType::LT
+          # TODO implement when EQ for not nomminal types (i.e. recurse)
           if left_nominal.definition.name == right_nominal.definition.name
             return atomic_type("Bool")
           else
             raise error("Boolean operator #{expr.operator} applied to two different types; left: #{left_nominal.definition.name}, right: #{right_nominal.definition.name}", expr.source_location)
           end
         else
-          raise error("Unsupported binary operator #{expr.operator}", expr.source_location)
+          raise error("Unsupported binary operator #{expr.operator.to_s}", expr.source_location)
         end
       end
 
@@ -706,18 +706,16 @@ module DoisC
         case expr.operator
         when ASTData::TokenType::NOT
           unless operand_type.is_a?(Types::NominalType) &&
-                operand_type.definition.name == "Bool"
+                 operand_type.definition.name == "Bool"
             raise error("Unary NOT requires Bool operand", expr.right.source_location)
           end
           return atomic_type("Bool")
-
         when ASTData::TokenType::SUB
           unless operand_type.is_a?(Types::NominalType) &&
-                ["Int", "Float"].includes?(operand_type.definition.name)
+                 ["Int", "Float"].includes?(operand_type.definition.name)
             raise error("Unary - requires numeric operand", expr.right.source_location)
           end
           return operand_type
-
         else
           raise error("Unsupported unary operator #{expr.operator}", expr.source_location)
         end
@@ -725,7 +723,7 @@ module DoisC
 
       private def verify_reassignment(stmt : Reassignment) : Types::Type
         var_type = @ctx.lookup(stmt.identifier.name) ||
-                  raise error("Undefined variable #{stmt.identifier.name}", stmt.identifier.source_location)
+                   raise error("Undefined variable #{stmt.identifier.name}", stmt.identifier.source_location)
 
         value_type = verify_expression(stmt.value)
 
@@ -859,9 +857,9 @@ module DoisC
         # # Build the constructor type reference: zero-parameter function returning this product type
         # # Use the product's own type reference as the return type
         # constructor_type_ref = Types::FunctionTypeReference.new(
-        #   {} of String => Types::NominalTypeReference,      
+        #   {} of String => Types::NominalTypeReference,
         #   Types::NominalTypeReference.new(decl.name),         # return type is the product itself
-        #   [] of String                                       
+        #   [] of String
         # )
 
         # # Create the ProductTypeDefinition with correct arguments: name, generics, fields, constructor_type_ref
@@ -903,7 +901,7 @@ module DoisC
                 g
               else
                 type_def = global.type_definition(expected_ref) ||
-                  raise error("Unknown type reference '#{expected_ref.name}' for field '#{field.name}'", field.source_location)
+                           raise error("Unknown type reference '#{expected_ref.name}' for field '#{field.name}'", field.source_location)
                 Types::NominalType.new(type_def, [] of Types::Type)
               end
             unless engine.is_assignable?(resolved_type, expected_type) && engine.is_assignable?(expected_type, resolved_type)
@@ -957,8 +955,6 @@ module DoisC
       private def current_symbol(name : String)
         ASTData::SymbolRef.new(@ctx.current_module_scope, name)
       end
-
     end
-
   end
 end

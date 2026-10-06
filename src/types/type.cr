@@ -2,7 +2,6 @@ require "./definition"
 
 module DoisC
   module Types
-
     abstract class Type
       abstract def ==(other : Type) : Bool
     end
@@ -71,6 +70,7 @@ module DoisC
     class TypeVariable < Type
       getter id : Int32
       property instance : Type? = nil
+
       def initialize(@id : Int32)
       end
 
@@ -81,7 +81,6 @@ module DoisC
       def to_s : String
         instance ? instance.not_nil!.to_s : "T#{id}"
       end
-    end 
-
+    end
   end
 end

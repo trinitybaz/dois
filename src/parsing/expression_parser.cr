@@ -3,7 +3,6 @@ require "./pattern_parser"
 
 module DoisC
   module Parsing
-
     module ExpressionParser
       include LiteralParser
       include PatternParser
@@ -38,7 +37,7 @@ module DoisC
         return left
       end
 
-      private def parse_variable_identifier : Identifier 
+      private def parse_variable_identifier : Identifier
         token = consume(TokenType::IDENTIFIER, "expected identifier")
         first_name = token.lexeme
         module_names = [] of String
@@ -60,13 +59,13 @@ module DoisC
         while match?(TokenType::PERIOD)
           accessor_names << consume(TokenType::IDENTIFIER, "expect identifier for accessor name").lexeme
         end
-
         return Identifier.new(name, module_names, accessor_names, location(token))
       end
 
       private def parse_binary_expression(left : Expression, operator : Token, right : Expression) : Expression
         if assign_operator?(operator)
-          var_expr = begin left.as(IdentifierExpression)
+          var_expr = begin
+            left.as(IdentifierExpression)
           rescue
             raise error("left side of assignment operator must be a variable", operator)
           end
@@ -86,19 +85,21 @@ module DoisC
 
       private def parse_operator(operator : Token) : Operator
         operator_type = case operator.type
-        when TokenType::ADD
-          OperatorType::ADD
-        when TokenType::SUB
-          OperatorType::SUB
-        when TokenType::MUL
-          OperatorType::MULT
-        when TokenType::DIV
-          OperatorType::DIV
-        when TokenType::COMP_EQ
-          OperatorType::EQ
-        else
-          raise error("unsupported operator '#{operator.lexeme}'", operator)
-        end
+                        when TokenType::ADD
+                          OperatorType::ADD
+                        when TokenType::SUB
+                          OperatorType::SUB
+                        when TokenType::MUL
+                          OperatorType::MULT
+                        when TokenType::DIV
+                          OperatorType::DIV
+                        when TokenType::COMP_EQ
+                          OperatorType::EQ
+                        when TokenType::COMP_LT
+                          OperatorType::LT
+                        else
+                          raise error("unsupported operator '#{operator.lexeme}'", operator)
+                        end
 
         Operator.new(operator_type)
       end
@@ -106,8 +107,8 @@ module DoisC
       private def parse_prefix : Expression
         case peek.type
         when TokenType::INT_LITERAL, TokenType::FLOAT_LITERAL, TokenType::STRING_LITERAL,
-            TokenType::CHAR_LITERAL, TokenType::TRUE, TokenType::FALSE, TokenType::NIL,
-            TokenType::L_BRACK, TokenType::L_BRACE
+             TokenType::CHAR_LITERAL, TokenType::TRUE, TokenType::FALSE, TokenType::NIL,
+             TokenType::L_BRACK, TokenType::L_BRACE
           parse_literal
         when TokenType::IDENTIFIER
           parse_identifier_expression
@@ -145,13 +146,13 @@ module DoisC
           return identifier_expr
         end
       end
-      
+
       private def desugar_assign_operator(type : TokenType) : TokenType
         token_type = DESUGARED_ASSIGN_OPERATORS[type]?
         return token_type if token_type
         return TokenType::EOF # fallback so we have some tokentype to return, should never happen
       end
-      
+
       private def parse_procedure_call(callee : Expression, location : SourceLocation) : ProcedureCall
         arguments = parse_arguments
         return ProcedureCall.new(callee, arguments, location)
@@ -194,12 +195,14 @@ module DoisC
         end
 
         else_body = if peek.type == TokenType::ELSE
-          advance # TokenType::ELSE
-          parse_expression
-        else nil end
+                      advance # TokenType::ELSE
+                      parse_expression
+                    else
+                      nil
+                    end
 
         consume(TokenType::END, "expected 'end' to end if expression")
-        
+
         return IfExpression.new(branches, else_body, location(if_token))
       end
 
@@ -219,11 +222,9 @@ module DoisC
         BINARY_OPERATORS.includes?(token.type)
       end
 
-      private def assign_operator?(token : Token) : Bool 
-        ASSIGN_OPERATORS.includes?(token.type) 
+      private def assign_operator?(token : Token) : Bool
+        ASSIGN_OPERATORS.includes?(token.type)
       end
-    
     end
-
   end
 end

@@ -1,10 +1,26 @@
 module MyModule has
 
-  proc main() do
-    let pi = 3.1415;
-    let r = 12.2;
-    let area = pi * r * r;
-    print(area);
+  fn fib $ (n : Int) : Int =>
+    if n == 0 then
+      0
+    elif n == 1 then
+      1
+    else
+      fib(n - 1) + fib(n - 2)
+    end
   end
 
+  proc main() do
+    let y = 0;
+    var x = 0;
+    while x < 10 do
+      if x == 2 do
+        print("we dont talk about 2");
+      else
+        print(x);
+      end
+      x = x + 1;
+    end
+    print(fib$(40));
+  end
 end

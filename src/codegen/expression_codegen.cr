@@ -4,7 +4,6 @@ require "../types/*"
 module DoisC
   module Codegen
     class ExpressionCodegen < BaseCodegen
-
       def initialize(@emitter : Emitter)
       end
 
@@ -28,8 +27,23 @@ module DoisC
           emit_call(expr)
         when ASTData::Reassignment
           emit_reassignment(expr)
+        when ASTData::IfExpression
+          emit_if_expression(expr)
         else
           raise "Unsupported expression codegen for #{expr.class}"
+        end
+      end
+
+      private def emit_if_expression(expr : ASTData::IfExpression)
+        expr.branches.each do |branch|
+          write("(")
+          emit(branch.condition)
+          write(") ? ")
+          emit(branch.body)
+          write(" : ")
+        end
+        if body = expr.else_body
+          emit(body)
         end
       end
 
@@ -104,7 +118,6 @@ module DoisC
       end
 
       private def emit_reassignment(expr : ASTData::Reassignment)
-        write "."
         write sanitize_name(expr.identifier.to_s)
         write " = "
         emit(expr.value)

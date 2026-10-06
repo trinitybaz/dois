@@ -27,6 +27,7 @@ end
 
 # unwraps ast into single main procedure (likely to be changed)
 def unwrap_main(ast : DoisC::ASTData::AST) : DoisC::ASTData::Procedure
+
   main_decl = ast.module_decl.body.find do |s|
     s.is_a?(DoisC::ASTData::ProcedureDeclaration) && s.name == "main"
   end.as(DoisC::ASTData::ProcedureDeclaration)
@@ -72,7 +73,7 @@ def walk_expressions(expression : AST::Expression, &block : AST::Expression ->)
     expression.arguments.each do |arg|
       walk_expressions(arg, &block)
     end
-  
+
   # literals, identifiers, etc → no children
   end
 end
