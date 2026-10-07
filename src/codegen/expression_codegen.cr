@@ -112,6 +112,7 @@ module DoisC
         write "(struct #{struct_name}){"
         expr.arguments.each_with_index do |arg, index|
           write ", " if index > 0
+          write "."
           emit(arg)
         end
         write "}"

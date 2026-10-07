@@ -4,21 +4,21 @@
 #   it "parses a simple let binding" do
 #     ast = parse <<-DOIS
 #       let x = 2;
-#     DOIS
+#       DOIS
 #     stmt = ast.procedure.statements.first
 #     stmt.should be_a(AST::Binding)
 #   end
 #   it "parses a simple var assignment" do
 #     ast = parse <<-DOIS
 #       var x = 3;
-#     DOIS
+#       DOIS
 #     stmt = ast.procedure.statements.first
 #     stmt.should be_a(AST::VarDeclaration)
 #   end
 #   it "parses a simple type annotation" do
 #     ast = parse <<-DOIS
 #       let x : Int = 2;
-#     DOIS
+#       DOIS
 #     stmt = ast.procedure.statements.first
 #     stmt.as(AST::Binding).type_id.should_not be_nil
 #   end
@@ -26,13 +26,13 @@
 #   it "fails on invalid let binding" do
 #     expect_parse_error <<-DOIS
 #       let x = ;
-#     DOIS
+#       DOIS
 #   end
 
 #   it "fails on missing semicolon" do
 #     expect_parse_error <<-DOIS
 #       let x = 5
-#     DOIS
+#       DOIS
 #   end
 
 #   it "parses binary expressions" do
@@ -52,7 +52,7 @@
 #       fn add $ (a : Int, b : Int) : Int =>
 #         a + b
 #       end
-#     DOIS
+#       DOIS
 #     stmt = ast.procedure.statements.first
 #     stmt.should be_a(AST::FunctionDeclaration)
 #   end
@@ -68,7 +68,7 @@
 #       match x then
 #         Nil => 0
 #       end;
-#     DOIS
+#       DOIS
 #     stmt = ast.procedure.statements.first
 #     stmt.should_not be_nil
 #   end
@@ -77,7 +77,7 @@
 #     ast = parse <<-DOIS
 #       let x = 1;
 #       let y = 2;
-#     DOIS
+#       DOIS
 #     ast.procedure.statements.size.should eq(2)
 #   end
 
@@ -90,7 +90,7 @@
 #   it "parses if expressions" do
 #     ast = parse <<-DOIS
 #       let x = if 1 == 1 then 2 else 3 end;
-#     DOIS
+#       DOIS
 #     stmt = ast.procedure.statements.first.as(AST::Binding)
 #     stmt.value.should be_a(AST::IfExpression)
 #   end
@@ -122,7 +122,7 @@
 #   it "parses generic type identifiers" do
 #     ast = parse <<-DOIS
 #       let x : Maybe(Int) = nil;
-#     DOIS
+#       DOIS
 #     stmt = ast.procedure.statements.first.as(AST::Binding)
 #     stmt.type_id.should_not be_nil
 #   end
@@ -133,7 +133,7 @@
 #         Some(value = v) => v,
 #         Nil => 0
 #       end;
-#     DOIS
+#       DOIS
 #     stmt = ast.procedure.statements.first
 #     stmt.should_not be_nil
 #   end
@@ -141,7 +141,7 @@
 #   it "fails on incomplete function declaration" do
 #     expect_parse_error <<-DOIS
 #       fn add $ (a : Int) : Int =>
-#     DOIS
+#       DOIS
 #   end
 
 #   it "handles empty function call arguments" do
@@ -169,7 +169,7 @@
 #   it "fails on missing end in if" do
 #     expect_parse_error <<-DOIS
 #       let x = if true then 1 else 2;
-#     DOIS
+#       DOIS
 #   end
 
 #   it "parses unary expressions" do
@@ -190,7 +190,7 @@
 #         Nil => 0,
 #         Some(value = v) => v
 #       end;
-#     DOIS
+#       DOIS
 #     stmt = ast.procedure.statements.first
 #     stmt.should_not be_nil
 #   end
